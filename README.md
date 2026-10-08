@@ -3,85 +3,76 @@
 </div>
 
 #### 🌐 Company Site - [Here](https://faceplugin.com)
+
 #### 🤗 Hugging Face - [Here](https://huggingface.co/FacePlugin-Ltd)
-#### 🛟 Help Center - [Here](https://doc.faceplugin.com)
+
+#### 📚 Help Center - [Here](https://doc.faceplugin.com)
+
 #### 🐳 Docker Hub - [Here](https://hub.docker.com/r/faceplugin/face-recognition-liveness-sdk)
 
 # FacePlugin Face Recognition SDK — Linux / Docker (Recognition + Liveness)
 
-> **Fastest:** `docker pull faceplugin/face-recognition-liveness-sdk:latest` → run → copy machine code → activate.  
-> **Local Linux:** put runtime under `lib/cpu/` → `./run.sh` → activate.  
-> **Docker Hub:** no Drive download. **Local:** Google Drive → `lib/cpu/` — see Option B.  
-> Jump: [Quick Start](#quick-start) · [Start the API](#start-the-api) · [SDK License](#sdk-license) · [Setup on your own app](#setup-on-your-own-app) · [Try it](#try-it)
+## Quick start
 
-## Quick Start
+- **Docker (recommended):** `docker pull faceplugin/face-recognition-liveness-sdk:latest` then `docker run` — [Option A](#option-a--docker-hub)
+- **Or local:** download CPU runtime into `lib/cpu/` — [Option B](#option-b--local-linux-runsh), then `./run.sh` — API on **8083**
+- **Confirm it is running:** `curl -s http://127.0.0.1:8083/api/health` (no license needed yet)
+- [Contact us](#contact) with your machine code to obtain a license key, then activate with `POST /api/activate` — [Activate your license](#activate-your-license)
+- **Try it:** Postman, curl, or local Gradio demo on **9003** (`python3 demo.py`)
 
-- [ ] **Docker (recommended):** `docker pull faceplugin/face-recognition-liveness-sdk:latest` then `docker run` — [Option A](#option-a--docker-hub-no-drive-download)
-- [ ] **Or local:** download CPU runtime into `lib/cpu/` — [Option B](#option-b--local-linux-runsh), then `./run.sh` — API on **8083**
-- [ ] **Confirm it is running:** `curl -s http://127.0.0.1:8083/api/health` (no license needed yet)
-- [ ] [Contact us](#contact) with your machine code to obtain a license key, then activate with `POST /api/activate` — [SDK License](#sdk-license)
-- [ ] **Try it:** Postman, curl, or local Gradio demo
-
-Docs: [https://doc.faceplugin.com](https://doc.faceplugin.com)
+Docs: [doc.faceplugin.com](https://doc.faceplugin.com)
 
 
 ## Introduction
 
-FacePlugin **Face Recognition SDK for Linux / Docker** combines on-premise **face recognition** and **passive face liveness (PAD)** in one App. One wrapper (`libFaceRecognitionSDK.so`), one license, two model packs (`far.fpk` + `fal.fpk`). Your license unlocks Recognition only, Liveness only, or both.
+**FacePlugin Face Recognition SDK** combines on-premise **face recognition** and **passive face liveness detection (PAD)** in one product for Linux and Docker. It runs face detection (bounding box, landmarks, pose, attributes), ICAO-style face quality analysis, template extraction, 1:1 matching, feature similarity scoring, and passive presentation-attack detection.
 
-It runs face detection (bounding box, landmarks, pose, attributes), ICAO-style face quality, template extraction, 1:1 matching, feature similarity, and passive presentation-attack detection — all on your server.
+The SDK uses one wrapper (`libFaceRecognitionSDK.so`), one license, and two model packs (`far.fpk` + `fal.fpk`). Your license unlocks Recognition only, Liveness only, or both. It is built for **banking, eKYC, and on-premise compliance** workflows. All processing runs on your own server, and **no images or biometric data are ever sent to FacePlugin**.
 
-This repository is **standalone**. Pull from Docker Hub and run — **no other FacePlugin repository is required**.
-
-All processing stays on your server. **No** biometric data is sent to FacePlugin cloud — built for banking, eKYC, and on-premise compliance workflows.
-
-**One repository** for Linux SDK + Docker. Native libraries are **linux/amd64**; the Docker image runs on Linux, Windows, and macOS hosts via Docker (Apple Silicon uses amd64 emulation). This product is **CPU-only**. Requires `LD_PRELOAD` of the wrapper for liveness VFS hooks (`./run.sh` / Dockerfile set this).
+The SDK runs as a REST API server on Linux (x86_64), or through Docker on Linux, Windows, and macOS (Apple Silicon uses amd64 emulation). It runs on CPU only and requires `LD_PRELOAD` of the wrapper for liveness VFS hooks (`./run.sh` and the Dockerfile set this). This repository is self-contained, with no other FacePlugin repository required.
 
 This combined SDK is **not** the older single-product repos [FaceRecognition-Docker](https://github.com/Faceplugin-ltd/FaceRecognition-Docker) (recognition only) or [FaceLivenessDetection-Docker](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Docker) (liveness only).
 
-Test with Postman, curl, or the local Gradio demo (`demo.py`) covering Detect, Quality, Match, and Liveness. Docs: [https://doc.faceplugin.com](https://doc.faceplugin.com).
-
 ### Main Functionalities
 
-| Feature | API |
-| ------- | --- |
-| Face detection (bounding box, landmarks, pose, attributes) | `POST /api/detect` · `sdk.detect` |
-| Face quality analysis (ICAO-style checks) | `POST /api/quality` · `sdk.quality` |
-| Face template extraction for matching | `POST /api/feature` · `sdk.feature` |
-| 1:1 face match (two images) | `POST /api/match` · `sdk.match` |
-| Feature vector similarity scoring | `POST /api/similarity` · `sdk.similarity` |
-| Face liveness (passive PAD) | `POST /api/liveness` · `sdk.liveness` |
-| License capabilities | `GET /api/licenseStatus` · `sdk.get_license_status` |
-| Health / machine code / activate | `GET /api/health` · `GET /api/machinecode` · `POST /api/activate` |
+| Feature                                                    | API                                                                 |
+| ---------------------------------------------------------- | ------------------------------------------------------------------- |
+| Face detection (bounding box, landmarks, pose, attributes) | `POST /api/detect` · `sdk.detect`                                   |
+| Face quality analysis (ICAO-style checks)                  | `POST /api/quality` · `sdk.quality`                                 |
+| Face template extraction for matching                      | `POST /api/feature` · `sdk.feature`                                 |
+| 1:1 face match (two images)                                | `POST /api/match` · `sdk.match`                                     |
+| Feature vector similarity scoring                          | `POST /api/similarity` · `sdk.similarity`                           |
+| Face liveness (passive PAD)                                | `POST /api/liveness` · `sdk.liveness`                               |
+| License capabilities                                       | `GET /api/licenseStatus` · `sdk.get_license_status`                 |
+| Health / machine code / activate                           | `GET /api/health` · `GET /api/machinecode` · `POST /api/activate`   |
 
 ### Product List
 
-| Platform | Repository |
-|----------|------------|
-| Android (Recognition) | [FaceRecognition-Android](https://github.com/Faceplugin-ltd/FaceRecognition-Android) |
-| iOS (Recognition) | [FaceRecognition-iOS](https://github.com/Faceplugin-ltd/FaceRecognition-iOS) |
-| React Native (Recognition) | [FaceRecognition-React-Native](https://github.com/Faceplugin-ltd/FaceRecognition-React-Native) |
-| Flutter (Recognition) | [FaceRecognition-Flutter](https://github.com/Faceplugin-ltd/FaceRecognition-Flutter) |
-| Ionic Capacitor (Recognition) | [FaceRecognition-Ionic-Capacitor](https://github.com/Faceplugin-ltd/FaceRecognition-Ionic-Capacitor) |
-| Ionic Cordova (Recognition) | [FaceRecognition-Ionic-Cordova](https://github.com/Faceplugin-ltd/FaceRecognition-Ionic-Cordova) |
-| Windows (Recognition + Liveness) | [FaceRecognitionSDK-Windows](https://github.com/Faceplugin-ltd/FaceRecognitionSDK-Windows) |
+| Platform                                    | Repository                                                                                                                                 |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Android (Recognition)                       | [FaceRecognition-Android](https://github.com/Faceplugin-ltd/FaceRecognition-Android)                                                       |
+| iOS (Recognition)                           | [FaceRecognition-iOS](https://github.com/Faceplugin-ltd/FaceRecognition-iOS)                                                               |
+| React Native (Recognition)                  | [FaceRecognition-React-Native](https://github.com/Faceplugin-ltd/FaceRecognition-React-Native)                                             |
+| Flutter (Recognition)                       | [FaceRecognition-Flutter](https://github.com/Faceplugin-ltd/FaceRecognition-Flutter)                                                       |
+| Ionic Capacitor (Recognition)               | [FaceRecognition-Ionic-Capacitor](https://github.com/Faceplugin-ltd/FaceRecognition-Ionic-Capacitor)                                       |
+| Ionic Cordova (Recognition)                 | [FaceRecognition-Ionic-Cordova](https://github.com/Faceplugin-ltd/FaceRecognition-Ionic-Cordova)                                           |
+| Windows (Recognition + Liveness)            | [FaceRecognitionSDK-Windows](https://github.com/Faceplugin-ltd/FaceRecognitionSDK-Windows)                                                 |
 | **Linux / Docker (Recognition + Liveness)** | **[FaceRecognition-LivenessDetection-Docker](https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Docker)** (**this repo**) |
-| Linux / Docker (Recognition) | [FaceRecognition-Docker](https://github.com/Faceplugin-ltd/FaceRecognition-Docker) |
-| Android (Liveness) | [FaceLivenessDetection-Android](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Android) |
-| iOS (Liveness) | [FaceLivenessDetection-iOS](https://github.com/Faceplugin-ltd/FaceLivenessDetection-iOS) |
-| Windows (Liveness) | [FaceLivenessDetection-Windows](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Windows) |
-| Linux / Docker (Liveness) | [FaceLivenessDetection-Docker](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Docker) |
+| Linux / Docker (Recognition)                | [FaceRecognition-Docker](https://github.com/Faceplugin-ltd/FaceRecognition-Docker)                                                         |
+| Android (Liveness)                          | [FaceLivenessDetection-Android](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Android)                                           |
+| iOS (Liveness)                              | [FaceLivenessDetection-iOS](https://github.com/Faceplugin-ltd/FaceLivenessDetection-iOS)                                                   |
+| Windows (Liveness)                          | [FaceLivenessDetection-Windows](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Windows)                                           |
+| Linux / Docker (Liveness)                   | [FaceLivenessDetection-Docker](https://github.com/Faceplugin-ltd/FaceLivenessDetection-Docker)                                             |
 
+---
 
-## Before you start
+## Start the API
 
-| Step | What you need |
-| ---- | ------------- |
-| 1 | A Linux host **or** Docker (Desktop or Engine) |
-| 2 | Docker Hub **or** Google Drive runtime in `./lib/cpu/` — see [Start the API](#start-the-api) |
-| 3 | Start **without** a license. Copy machine code from logs or `GET /api/machinecode`, send it to FacePlugin ([contact](#contact)), then activate with your license key |
+You do **not** need a license to start the API. The server prints your machine code on startup, which you'll need to [activate your license](#activate-your-license). Product endpoints unlock after you activate.
 
-You do **not** need a license to start the API once. Product endpoints unlock after you activate.
+<p align="center">
+ <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/desktop/unactivated.png" alt="Docker logs: machine code printed, activation failed, Flask API still listening" width="900"/>
+</p>
 
 ### System requirements
 
@@ -92,19 +83,9 @@ You do **not** need a license to start the API once. Product endpoints unlock af
 | Disk | 4 GB | 8 GB |
 | OS (Docker) | Linux + Docker Engine | Ubuntu 22.04 / 24.04 |
 
-## Start the API
+### Option A — Docker Hub
 
-You can start **without** a license — the server prints your machine code on startup.
-
-The API starts even if activation fails. Copy the **machine code** from the log and send it to FacePlugin.
-
-<p align="center">
- <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/desktop/unactivated.png" alt="Docker logs: machine code printed, activation failed, Flask API still listening" width="900"/>
-</p>
-
-### Option A — Docker Hub (no Drive download)
-
-Runtime is already inside the image. No Google Drive step.
+The runtime is already inside the image, so no Google Drive download is needed.
 
 ```bash
 sudo docker pull faceplugin/face-recognition-liveness-sdk:latest
@@ -127,24 +108,24 @@ To run multiple containers on one Linux host with a shared machine code / licens
 
 ### Option B — Local Linux (`./run.sh`)
 
-Requires the Google Drive runtime under `lib/cpu/`. Needs glibc **2.38+** (for example Ubuntu 24.04).
+This option runs the server directly on your machine. It requires glibc **2.38 or newer** (for example, Ubuntu 24.04). Check your version with `ldd --version`. No GPU is needed; this product runs on CPU only.
 
-#### Get the runtime
-
-The `./lib/cpu/` tree is empty on GitHub because native binaries and model files are too large. This product is **CPU-only**.
-
-**[FaceRecognition-LivenessDetection Linux runtime (Google Drive)](https://drive.google.com/drive/folders/1Lzz3eb_JMDZ0xyGtnGzxsUmMbgaYzin6)**
-
-1. Clone the repo (if you have not already):
+#### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Faceplugin-ltd/FaceRecognition-LivenessDetection-Docker.git
 cd FaceRecognition-LivenessDetection-Docker
 ```
 
-2. Open the Google Drive folder above.
-3. Download **all files** in that folder.
-4. Put every file **directly** into `./lib/cpu/` — not inside a nested subfolder.
+#### 2. Download the runtime
+
+The `lib/cpu/` folder is empty on GitHub because the native libraries and model files are too large to host there.
+
+1. Open the [FaceRecognition-LivenessDetection Linux runtime folder on Google Drive](https://drive.google.com/drive/folders/1Lzz3eb_JMDZ0xyGtnGzxsUmMbgaYzin6).
+2. Download every file in the folder.
+3. Place the files **directly** in `lib/cpu/`, not in a subfolder.
+
+Your project should look like this:
 
 ```text
 FaceRecognition-LivenessDetection-Docker/
@@ -155,66 +136,51 @@ FaceRecognition-LivenessDetection-Docker/
         ├── far.fpk
         ├── libfal-eng.so
         ├── fal.fpk
-        └── ... (other runtimes from Drive)
+        └── ... (remaining files from Google Drive)
 ```
 
-Wrong layout: `lib/cpu/SomeFolder/libFaceRecognitionSDK.so`.
+> ⚠️ If Google Drive gives you a zip, extract it and move the files up so you don't end up with `lib/cpu/SomeFolder/libFaceRecognitionSDK.so`.
 
-```bash
-ls lib/cpu/libFaceRecognitionSDK.so
-ls lib/cpu/libfar-eng.so
-ls lib/cpu/far.fpk
-ls lib/cpu/libfal-eng.so
-ls lib/cpu/fal.fpk
-```
-
-#### Run
+#### 3. Install dependencies and run
 
 ```bash
 pip3 install -r requirements.txt
 ./run.sh
 ```
 
-API: **http://127.0.0.1:8083**
+The API starts at **http://127.0.0.1:8083**, and the machine code is printed in the terminal. Continue with [Activate your license](#activate-your-license).
 
-Copy the **machine code** from the terminal (or `GET /api/machinecode`), then activate with `POST /api/activate` or paste the license key when prompted.
+## Activate your license
 
+Licenses work **offline** and are tied to the machine code of the environment where the server runs. Offline cryptography is built into the SDK, so no OpenSSL install is needed.
 
-## SDK License
+> ⚠️ **Docker and local installs have different machine codes.** Get the machine code from the same environment you'll use in production. If you'll run in Docker, send the code from the Docker container, not from the host.
 
-Licenses are **offline** and bound to your machine code. Offline cryptography is built into the SDK — no OpenSSL install.
+1. **Start the server** using Docker Hub or `./run.sh` (see [Start the API](#start-the-api)). You don't need a license for the first start.
+2. **Get your machine code.** It's printed in the startup log, or you can fetch it with `GET /api/machinecode`.
+3. **Send the machine code to FacePlugin** ([contact us](#contact)). We'll reply with a license key for that machine code.
+4. **Activate the license.** Save the license key to `license.txt` in the project root, replacing anything already in the file. Then send it to the running server:
 
-### How to get a license
+   ```bash
+   curl -s -X POST http://127.0.0.1:8083/api/activate \
+     -H 'Content-Type: text/plain' \
+     --data-binary @license.txt
+   ```
 
-1. **Start the server** ([above](#start-the-api)) with Docker Hub or local `./run.sh`. A license is not required for the first start.
-2. **Copy the machine code** from container logs or `GET /api/machinecode`.
-3. **Send that machine code** to FacePlugin ([contact](#contact)). We will issue a license key for that code.
-4. **Activate** with the license key:
-
-```bash
-# Paste your license key into ./license.txt (overwrite the file).
-
-# Detached Docker will not re-read license.txt on its own — POST the key:
-curl -s -X POST http://127.0.0.1:8083/api/activate \
-  -H 'Content-Type: text/plain' \
-  --data-binary @license.txt
-
-```
+   If you run in Docker, this command is required, because detached containers don't re-read `license.txt` after they start. The same command also works with `./run.sh`.
 
 <p align="center">
  <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/desktop/activate.png" alt="POST /api/activate with license.txt — success true" width="900"/>
 </p>
 
-Use the machine code from the environment you will run in production. **Docker and local host codes are different** — if you run in Docker, send the Docker machine code.
-
 ### License capabilities (Recognition + Liveness)
 
 After activation, `GET /api/licenseStatus` reports what the key unlocks. The Gradio demo shows the same summary as **License:** at the top of the page.
 
-| Capability | Meaning |
-| --- | --- |
-| **Recognition** | Detect, quality, match, feature, similarity |
-| **Liveness** | Passive face anti-spoofing (`/api/liveness`) |
+| Capability      | Meaning                                       |
+| --------------- | --------------------------------------------- |
+| **Recognition** | Detect, quality, match, feature, similarity   |
+| **Liveness**    | Passive face anti-spoofing (`/api/liveness`)  |
 
 Typical labels:
 
@@ -222,6 +188,8 @@ Typical labels:
 - **Recognition only** — Detect / Quality / Match; Liveness stays unavailable
 - **Liveness only** — Liveness tab; Detect / Quality / Match stay unavailable
 - **Not licensed** — machine code only until you activate
+
+Check status anytime:
 
 ```bash
 curl -s http://127.0.0.1:8083/api/licenseStatus
@@ -235,28 +203,23 @@ curl -s http://127.0.0.1:8083/api/licenseStatus
 curl -s http://127.0.0.1:8083/api/health
 ```
 
-### Documentation
-
-[https://doc.faceplugin.com](https://doc.faceplugin.com)
-
 ### Postman
 
 Import [`postman/FaceRecognition-API.postman_collection.json`](postman/FaceRecognition-API.postman_collection.json).
 
 Default base URL: `http://127.0.0.1:8083`
 
-Routes are `/api/*` (no version segment in paths).
 
 ### Demo UI (Gradio) — local only
 
-The Docker image is **API/SDK server only** (no Gradio). For a local FacePlugin Face Recognition + Liveness demo in the browser — Detect, Quality, Match, and Liveness — on the host (API must already be running on port 8083). The header shows **License:** from `/api/licenseStatus`. Tabs stay visible; unavailable capabilities show a note instead of results.
+The Docker image includes only the API server, not the demo UI. To view results in your browser, run the Gradio demo on your own machine. Make sure the API is already running on port 8083 first.
 
 ```bash
 pip3 install -r requirements-demo.txt
 DEMO_PORT=9003 API_BASE=http://127.0.0.1:8083 python3 demo.py
 ```
 
-Open **[http://127.0.0.1:9003](http://127.0.0.1:9003)**. Examples when present: `assets/examples/samples/`.
+Open **[http://127.0.0.1:9003](http://127.0.0.1:9003)** in your browser. Sample images, if included, are in `assets/examples/samples/`. The page header shows your current license status, taken from `/api/licenseStatus`. All tabs stay visible; a capability your license doesn't cover shows a note instead of results.
 
 <p align="center">
  <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-recognition/desktop/demo-ui-detect.png" alt="FacePlugin Face Recognition SDK Linux demo — Detect tab with landmarks and attributes" width="900"/>
@@ -274,22 +237,24 @@ Open **[http://127.0.0.1:9003](http://127.0.0.1:9003)**. Examples when present: 
  <img src="https://raw.githubusercontent.com/Faceplugin-ltd/faceplugin-assets/main/screenshots/face-liveness/desktop/demo-ui.png" alt="FacePlugin Face Recognition SDK Linux demo — Liveness tab with Real/Spoof score" width="900"/>
 </p>
 
-Tabs: **Detect**, **Quality**, **Match**, **Liveness**. Each recognition action has a **Result** table (attributes, quality checks, or match scores) and **Raw JSON** for integration. Detect / Quality / Liveness examples are under `assets/examples/samples/` (odd/even faces plus real/fake liveness samples). Match is **Odd vs Even**: pick one image from each group, then Match.
+- **Detect** — bounding box, landmarks, pose, and attributes
+- **Quality** — ICAO-style face quality checks
+- **Match** — 1:1 match scores; pick one image from the **Odd** group and one from the **Even** group, then Match
+- **Liveness** — passive Real / Spoof score (needs a Liveness-capable license)
+
+Each tab shows a **Result** table and **Raw JSON** for integration. The examples under `assets/examples/samples/` include odd/even faces and real/fake liveness samples.
+
+---
 
 ## Setup on your own app
 
-Two ways to call the same engine. Full protocol: [https://doc.faceplugin.com](https://doc.faceplugin.com).
+Two paths. You do **not** need the Gradio demo (`demo.py`) in production; it is a host-only test UI.
 
-| Path | When to use |
-| ---- | ----------- |
-| **HTTP** (`app.py`) | Any language. Keep this API running and `POST` images as JSON. |
-| **`sdk.py`** | Python on the **same** Linux host as `lib/cpu/` (or inside the container). No HTTP hop. |
+**HTTP** (any language) — start the API (see [Start the API](#start-the-api)) and keep it running, then `POST` base64 images as JSON to `/api/detect`, `/api/quality`, `/api/match`, `/api/feature`, `/api/similarity`, or `/api/liveness`. See the Postman collection for request examples, and [doc.faceplugin.com](https://doc.faceplugin.com) for the full protocol.
 
-**HTTP (any language):** start the API, then call `/api/detect`, `/api/quality`, `/api/match`, `/api/feature`, `/api/similarity`, `/api/liveness`. Images are base64. See [Try it](#try-it) and Postman.
+**Python in-process** — on the **same** Linux host as `lib/cpu/` (or inside the container), copy [`sdk.py`](sdk.py) + `lib/cpu/` into your project (or `import sdk` from this repo) and call the SDK directly, with no HTTP hop. For native runs, set `LD_LIBRARY_PATH` and `LD_PRELOAD` the same way `./run.sh` does. See [About SDK](#about-sdk).
 
-**Python in-process:** copy `sdk.py` + `lib/cpu/` into your project (or `import sdk` from this repo). Call order: `get_machine_code` → `activate` → `init_sdk` → detect / quality / feature / match / similarity / liveness. Check `get_license_status()` for recognition vs liveness flags. Return code `0` means success. For native runs, set `LD_LIBRARY_PATH` and `LD_PRELOAD` the same way `./run.sh` does.
-
-You do **not** need Gradio (`demo.py`) in production — it is a host-only test UI.
+---
 
 ## About SDK
 
@@ -375,7 +340,10 @@ status = sdk.get_license_status()
 
 HTTP endpoints: `/api/health`, `/api/machinecode`, `/api/licenseStatus`, `/api/backend`, `/api/activate`, `/api/detect`, `/api/quality`, `/api/match`, `/api/feature`, `/api/similarity`, `/api/liveness`.
 
+
 ## Contact
+
+Request a license, machine-code activation (machine code → license key), or integration help:
 
 <div align="left">
 <a target="_blank" href="mailto:info@faceplugin.com"><img src="https://img.shields.io/badge/email-info@faceplugin.com-blue.svg?logo=gmail" alt="faceplugin.com"></a>&emsp;
